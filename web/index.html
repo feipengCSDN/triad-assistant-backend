@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>铁三角 AI 填报测试台</title>
+  <style>
+    :root { font-family: Inter, "Microsoft YaHei", sans-serif; color: #18212f; background: #f4f6f8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .shell { max-width: 1240px; margin: 0 auto; padding: 28px 20px 48px; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 24px; }
+    .eyebrow { margin: 0 0 7px; color: #147d72; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    h1, h2, p { margin-top: 0; }
+    h1 { margin-bottom: 7px; font-size: clamp(25px, 4vw, 38px); line-height: 1.12; letter-spacing: 0; }
+    .subtitle { margin-bottom: 0; color: #657181; font-size: 14px; }
+    .endpoint { display: flex; align-items: center; gap: 8px; width: min(100%, 380px); }
+    .endpoint input { min-width: 0; flex: 1; }
+    .layout { display: grid; grid-template-columns: minmax(300px, 390px) minmax(0, 1fr); gap: 18px; align-items: start; }
+    .panel { border: 1px solid #dfe4e8; border-radius: 8px; background: #fff; box-shadow: 0 8px 28px rgba(31, 47, 61, .06); }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid #edf0f2; }
+    .panel-head h2 { margin: 0; font-size: 17px; }
+    .panel-body { padding: 20px; }
+    label { display: block; margin-bottom: 7px; color: #526070; font-size: 13px; font-weight: 700; }
+    input, select, textarea { width: 100%; border: 1px solid #cbd3da; border-radius: 5px; padding: 10px 11px; color: #18212f; background: #fff; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: #147d72; box-shadow: 0 0 0 3px rgba(20, 125, 114, .12); }
+    textarea { min-height: 178px; resize: vertical; line-height: 1.65; }
+    .field { margin-bottom: 18px; }
+    .switcher { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; margin-bottom: 20px; border: 1px solid #dfe4e8; border-radius: 6px; background: #f5f7f8; }
+    .switcher button { border: 0; border-radius: 4px; padding: 9px 6px; color: #687583; background: transparent; }
+    .switcher button.active { color: #fff; background: #147d72; font-weight: 700; }
+    .hidden { display: none !important; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .primary, .secondary { border-radius: 5px; padding: 11px 14px; font-weight: 800; }
+    .primary { border: 1px solid #147d72; color: #fff; background: #147d72; }
+    .primary:hover { background: #0f685f; }
+    .secondary { border: 1px solid #cbd3da; color: #526070; background: #fff; }
+    .secondary:hover { background: #f4f6f8; }
+    .upload { border: 1px dashed #b9c5cc; border-radius: 6px; padding: 15px; background: #fafbfb; }
+    .upload input { padding: 8px; border: 0; background: transparent; }
+    .file-name { margin: 8px 0 0; color: #687583; font-size: 12px; overflow-wrap: anywhere; }
+    .record-actions { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .record-button { border: 1px solid #c74b4b; border-radius: 5px; padding: 9px 12px; color: #a52f2f; background: #fff; font-weight: 800; }
+    .record-button.recording { color: #fff; background: #c74b4b; }
+    .record-time { color: #687583; font-size: 12px; font-variant-numeric: tabular-nums; }
+    .preview { display: block; width: 100%; height: 34px; margin-top: 10px; }
+    .status { min-height: 42px; margin-bottom: 16px; padding: 12px 14px; border-left: 3px solid #aab5bd; color: #526070; background: #f5f7f8; font-size: 13px; }
+    .status.success { border-color: #147d72; color: #12675e; background: #eaf6f3; }
+    .status.error { border-color: #c74b4b; color: #9c3030; background: #fff0f0; }
+    .result-empty { min-height: 440px; display: grid; place-items: center; padding: 30px; color: #8995a1; text-align: center; }
+    .result-empty strong { display: block; margin-bottom: 7px; color: #526070; }
+    .result-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .result-head h2 { margin: 0; font-size: 19px; }
+    .badge { display: inline-flex; border-radius: 999px; padding: 5px 9px; color: #12675e; background: #eaf6f3; font-size: 12px; font-weight: 800; }
+    .transcript { margin-bottom: 18px; border-left: 3px solid #e0a83d; padding: 11px 13px; color: #526070; background: #fff8e9; font-size: 13px; line-height: 1.6; }
+    .issues { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .issue-box { border-radius: 6px; padding: 12px; font-size: 13px; }
+    .issue-box.missing { background: #fff0f0; color: #9c3030; }
+    .issue-box.warning { background: #fff8e9; color: #8b641a; }
+    .issue-box strong { display: block; margin-bottom: 6px; }
+    .issue-box ul { margin: 0; padding-left: 18px; line-height: 1.7; }
+    .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .field-card { min-width: 0; border: 1px solid #e5e9ec; border-radius: 6px; padding: 13px; }
+    .field-card.low { border-color: #e0a83d; background: #fffdf7; }
+    .field-label { margin-bottom: 7px; color: #657181; font-size: 12px; font-weight: 800; }
+    .field-value { min-height: 22px; color: #18212f; line-height: 1.55; overflow-wrap: anywhere; }
+    .field-value.empty { color: #a2acb5; }
+    .meta { margin-top: 9px; color: #8995a1; font-size: 11px; line-height: 1.5; }
+    .meta b { color: #687583; }
+    @media (max-width: 800px) { .topbar { display: block; } .endpoint { margin-top: 16px; width: 100%; } .layout { grid-template-columns: 1fr; } .result-empty { min-height: 220px; } }
+    @media (max-width: 520px) { .shell { padding: 20px 12px 32px; } .panel-body, .panel-head { padding: 15px; } .fields, .issues, .actions { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Iron Triangle · AI Form Lab</p>
+        <h1>铁三角 AI 填报测试台</h1>
+        <p class="subtitle">上传录音或粘贴转写文本，检查表单识别结果后再回填 APP。</p>
+      </div>
+      <div class="endpoint">
+        <label for="baseUrl">后端地址</label>
+        <!-- <input id="baseUrl" value="http://47.94.81.141:8000" aria-label="后端地址"> -->
+        <input id="baseUrl" value="http://127.0.0.1:8000" aria-label="后端地址">
+      </div>
+    </header>
+
+    <section class="layout">
+      <section class="panel">
+        <div class="panel-head"><h2>输入内容</h2><span id="modeBadge" class="badge">拜访互动</span></div>
+        <div class="panel-body">
+          <div class="switcher" role="tablist">
+            <button class="active" data-scenario="visit_interaction" type="button">拜访互动</button>
+            <button data-scenario="opportunity" type="button">商机编辑</button>
+          </div>
+          <div class="field">
+            <label for="transcript">转写文本</label>
+            <textarea id="transcript" placeholder="例如：今天在客户总部与采购经理张三沟通了设备交付计划……"></textarea>
+          </div>
+          <div class="field upload">
+            <label for="audio">录音文件</label>
+            <input id="audio" type="file" accept="audio/*">
+            <p id="fileName" class="file-name">未选择录音</p>
+            <div class="record-actions">
+              <button id="recordButton" class="record-button" type="button">开始录音</button>
+              <span id="recordTime" class="record-time">00:00</span>
+            </div>
+            <audio id="preview" class="preview hidden" controls></audio>
+          </div>
+          <div class="actions">
+            <button id="textSubmit" class="primary" type="button">识别转写文本</button>
+            <button id="voiceSubmit" class="secondary" type="button">上传录音并识别</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>识别结果</h2><span id="resultBadge" class="badge">等待输入</span></div>
+        <div class="panel-body">
+          <div id="status" class="status">请在左侧输入转写文本，或选择录音文件后开始识别。</div>
+          <div id="empty" class="result-empty"><div><strong>结果会显示在这里</strong><span>字段建议包含识别值、置信度和原文证据。</span></div></div>
+          <div id="result" class="hidden">
+            <div class="transcript"><b>最终转写：</b><span id="resultTranscript"></span></div>
+            <div class="issues">
+              <div class="issue-box missing"><strong>缺少必填项</strong><ul id="missing"></ul></div>
+              <div class="issue-box warning"><strong>需要人工确认</strong><ul id="warnings"></ul></div>
+            </div>
+            <div id="fields" class="fields"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script>
+    const labels = {
+      interaction_location: "互动地点", description: "说明", contact_name_1: "互动对象姓名1", contact_title_1: "互动对象职务1", contact_phone_1: "互动对象电话1", contact_level_1: "互动对象层级1", communication_content: "沟通内容", customer_needs: "客户需求", resolved_issues: "已解决问题", pending_issues: "待解决问题", lost_deal_risk: "丢单风险", tracking_status_description: "跟踪情况说明", next_action_strategy: "下一步行动策略"
+    };
+    const formDefinitions = {
+      visit_interaction: [
+        { key: "interaction_location", label: "互动地点", required: true }, { key: "description", label: "说明" }, { key: "contact_name_1", label: "互动对象姓名1", required: true }, { key: "contact_title_1", label: "互动对象职务1", required: true }, { key: "contact_phone_1", label: "互动对象电话1", required: true }, { key: "contact_level_1", label: "互动对象层级1", required: true, options: ["高管理", "中管层", "一般管理"] }, { key: "communication_content", label: "沟通内容", required: true }, { key: "customer_needs", label: "客户需求" }, { key: "resolved_issues", label: "已解决问题" }, { key: "pending_issues", label: "待解决问题" }
+      ],
+      opportunity: [
+        { key: "lost_deal_risk", label: "丢单风险", required: true }, { key: "tracking_status_description", label: "跟踪情况说明", required: true }, { key: "next_action_strategy", label: "下一步行动策略", required: true }
+      ]
+    };
+    let scenario = "visit_interaction";
+    const $ = (id) => document.getElementById(id);
+    const setStatus = (text, type = "") => { $("status").textContent = text; $("status").className = `status ${type}`; };
+    const listIssues = (id, items, emptyText) => { const list = $(id); list.innerHTML = ""; if (!items.length) { const li = document.createElement("li"); li.textContent = emptyText; list.appendChild(li); return; } items.forEach((item) => { const li = document.createElement("li"); li.textContent = `${labels[item.field] || item.field}：${item.message}`; list.appendChild(li); }); };
+    const render = (data) => {
+      $("empty").classList.add("hidden"); $("result").classList.remove("hidden"); $("resultBadge").textContent = "识别完成"; $("resultTranscript").textContent = data.transcript;
+      listIssues("missing", data.missing_required_fields, "无"); listIssues("warnings", data.warnings, "无");
+      const container = $("fields"); container.innerHTML = "";
+      Object.entries(data.fields).forEach(([key, item]) => { const card = document.createElement("article"); card.className = `field-card${item.value && item.confidence < .7 ? " low" : ""}`; const value = item.value || "未识别"; card.innerHTML = `<div class="field-label">${labels[key] || key}</div><div class="field-value${item.value ? "" : " empty"}">${escapeHtml(value)}</div><div class="meta"><b>置信度</b> ${Math.round(item.confidence * 100)}%<br><b>证据</b> ${escapeHtml(item.evidence || "无")}</div>`; container.appendChild(card); });
+    };
+    const escapeHtml = (value) => { const div = document.createElement("div"); div.textContent = value; return div.innerHTML; };
+    const requestJson = async () => { const transcript = $("transcript").value.trim(); if (!transcript) { setStatus("请先输入转写文本。", "error"); return; } const body = { transcript, form: { fields: formDefinitions[scenario] } }; await call(`/api/v1/form-extractions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); };
+    let recordedAudio = null;
+    let audioContext = null;
+    let audioSource = null;
+    let audioProcessor = null;
+    let recorderStream = null;
+    let recordingBuffers = [];
+    let recordStartedAt = 0;
+    let recordTimer = null;
+    const updateRecordTime = () => { const seconds = Math.floor((Date.now() - recordStartedAt) / 1000); $("recordTime").textContent = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`; };
+    const mergeAudioBuffers = (buffers) => { const length = buffers.reduce((total, buffer) => total + buffer.length, 0); const merged = new Float32Array(length); let offset = 0; buffers.forEach((buffer) => { merged.set(buffer, offset); offset += buffer.length; }); return merged; };
+    const downsample = (buffer, inputRate, outputRate) => { if (inputRate === outputRate) return buffer; const ratio = inputRate / outputRate; const length = Math.round(buffer.length / ratio); const result = new Float32Array(length); for (let index = 0; index < length; index += 1) { const start = Math.floor(index * ratio); const end = Math.min(Math.floor((index + 1) * ratio), buffer.length); let total = 0; for (let cursor = start; cursor < end; cursor += 1) total += buffer[cursor]; result[index] = total / Math.max(1, end - start); } return result; };
+    const encodeWav = (samples, sampleRate) => { const bytes = new ArrayBuffer(44 + samples.length * 2); const view = new DataView(bytes); const write = (offset, text) => [...text].forEach((character, index) => view.setUint8(offset + index, character.charCodeAt(0))); write(0, "RIFF"); view.setUint32(4, 36 + samples.length * 2, true); write(8, "WAVE"); write(12, "fmt "); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true); view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true); write(36, "data"); view.setUint32(40, samples.length * 2, true); for (let index = 0; index < samples.length; index += 1) { const sample = Math.max(-1, Math.min(1, samples[index])); view.setInt16(44 + index * 2, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true); } return new Blob([view], { type: "audio/wav" }); };
+    const startRecording = async () => {
+      if (!navigator.mediaDevices?.getUserMedia || !window.AudioContext) { setStatus("当前浏览器不支持网页录音，请改用录音文件上传。", "error"); return; }
+      try {
+        recorderStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new AudioContext();
+        audioSource = audioContext.createMediaStreamSource(recorderStream);
+        audioProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+        audioProcessor.addEventListener("audioprocess", (event) => { recordingBuffers.push(new Float32Array(event.inputBuffer.getChannelData(0))); });
+        audioSource.connect(audioProcessor); audioProcessor.connect(audioContext.destination);
+        recordStartedAt = Date.now(); recordTimer = setInterval(updateRecordTime, 250); $("recordButton").textContent = "停止录音"; $("recordButton").classList.add("recording"); setStatus("正在录音，请讲述需要填报的内容……");
+      } catch (error) { setStatus(error.name === "NotAllowedError" ? "麦克风权限被拒绝，请允许浏览器使用麦克风后重试。" : "无法启动麦克风，请检查设备和浏览器权限。", "error"); }
+    };
+    const stopRecording = async () => { if (!audioProcessor) return; audioProcessor.disconnect(); audioSource?.disconnect(); recorderStream?.getTracks().forEach((track) => track.stop()); const sampleRate = audioContext.sampleRate; await audioContext.close(); const samples = downsample(mergeAudioBuffers(recordingBuffers), sampleRate, 16000); recordedAudio = new File([encodeWav(samples, 16000)], "audio.wav", { type: "audio/wav" }); recordingBuffers = []; audioProcessor = null; audioSource = null; audioContext = null; clearInterval(recordTimer); $("recordButton").textContent = "开始录音"; $("recordButton").classList.remove("recording"); $("audio").value = ""; $("fileName").textContent = `已录音：${recordedAudio.name}（${(recordedAudio.size / 1024).toFixed(1)} KB，${recordedAudio.type}）`; $("preview").src = URL.createObjectURL(recordedAudio); $("preview").classList.remove("hidden"); setStatus("录音已转换为标准 WAV，可以点击“上传录音并识别”。", "success"); };
+    const toggleRecording = () => { if (audioProcessor) stopRecording(); else { recordingBuffers = []; startRecording(); } };
+    const requestVoice = async () => { const file = recordedAudio || $("audio").files[0]; if (!file) { setStatus("请先选择录音文件，或点击“开始录音”。", "error"); return; } const body = new FormData(); body.append("audio", file); await call(`/api/v1/voice-form-extractions`, { method: "POST", body }, (data) => { $("transcript").value = data.transcript; $("result").classList.add("hidden"); $("empty").classList.remove("hidden"); $("resultBadge").textContent = "已转写"; setStatus("语音已转为文本，请确认后点击“识别转写文本”提取字段。", "success"); }); };
+    const call = async (path, options, onSuccess = render) => { setStatus("正在请求后端，请稍候……"); $("textSubmit").disabled = true; $("voiceSubmit").disabled = true; try { const response = await fetch(`${$("baseUrl").value.replace(/\/$/, "")}${path}`, options); const data = await response.json(); if (!response.ok) throw new Error(data.detail || "请求失败"); onSuccess(data); if (onSuccess === render) setStatus("识别结果已返回，请人工确认后再填入 APP。", "success"); } catch (error) { setStatus(error.message || "无法连接后端，请检查地址和服务状态。", "error"); $("resultBadge").textContent = "请求失败"; } finally { $("textSubmit").disabled = false; $("voiceSubmit").disabled = false; } };
+    document.querySelectorAll("[data-scenario]").forEach((button) => button.addEventListener("click", () => { scenario = button.dataset.scenario; document.querySelectorAll("[data-scenario]").forEach((item) => item.classList.toggle("active", item === button)); $("modeBadge").textContent = scenario === "visit_interaction" ? "拜访互动" : "商机编辑"; $("result").classList.add("hidden"); $("empty").classList.remove("hidden"); $("resultBadge").textContent = "等待输入"; setStatus("请在左侧输入转写文本，或选择录音文件后开始识别。"); }));
+    $("audio").addEventListener("change", () => { recordedAudio = null; $("preview").classList.add("hidden"); $("fileName").textContent = $("audio").files[0]?.name || "未选择录音"; }); $("recordButton").addEventListener("click", toggleRecording); $("textSubmit").addEventListener("click", requestJson); $("voiceSubmit").addEventListener("click", requestVoice);
+  </script>
+</body>
+</html>
