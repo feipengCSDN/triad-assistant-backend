@@ -28,6 +28,7 @@ class FormDefinition(BaseModel):
 class ExtractRequest(BaseModel):
     transcript: str = Field(min_length=1, max_length=20_000)
     form: FormDefinition
+    include_metadata: bool = False
 
 
 class ValidationIssue(BaseModel):
@@ -37,7 +38,7 @@ class ValidationIssue(BaseModel):
 
 class ExtractResponse(BaseModel):
     transcript: str
-    fields: dict[str, FieldSuggestion]
+    fields: dict[str, str | None | FieldSuggestion]
     missing_required_fields: list[ValidationIssue]
     warnings: list[ValidationIssue]
 

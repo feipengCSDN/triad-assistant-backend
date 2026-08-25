@@ -61,6 +61,7 @@ def test_form_extractions_uses_client_form_definition(monkeypatch) -> None:
         "/api/v1/form-extractions",
         json={
             "transcript": "客户在总部会议室沟通交付计划。",
+            "include_metadata": True,
             "form": {
                 "fields": [
                     {"key": "location", "label": "互动地点", "required": True},

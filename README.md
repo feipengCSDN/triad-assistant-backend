@@ -56,11 +56,14 @@ docker compose up --build -d
       {"key": "contact_level", "label": "互动对象层级", "options": ["高管理", "中管层", "一般管理"]},
       {"key": "communication_content", "label": "沟通内容", "required": true}
     ]
-  }
+  },
+  "include_metadata": false
 }
 ```
 
-请求仅包含转写文本和表单定义。前端通过 `form.fields` 决定需要抽取的字段：`key` 是稳定字段标识，`label` 是字段名称，`required` 表示必填项，`options` 可限制候选值。响应只包含传入的字段；每个字段包含 `value`、`confidence`、`evidence`，`missing_required_fields` 指出缺失的必填项，`warnings` 指出置信度低于 0.7 的值。
+请求包含转写文本、表单定义和可选的 `include_metadata`。前端通过 `form.fields` 决定需要抽取的字段：`key` 是稳定字段标识，`label` 是字段名称，`required` 表示必填项，`options` 可限制候选值。默认 `include_metadata` 为 `false`，响应中的 `fields` 直接返回 `{字段 key: string|null}`，适合 App 自动回填；传 `true` 时才返回 `{value, confidence, evidence}`，并生成低置信度 `warnings`。两种模式都会返回 `missing_required_fields`。
+
+默认轻量模式限制模型输出为 `LLM_MAX_TOKENS`（默认 512）；元数据模式使用 `LLM_METADATA_MAX_TOKENS`（默认 1024）。
 
 ### 语音转写
 

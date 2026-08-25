@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_model: str = ""
     http_timeout_seconds: float = 60
+    llm_max_tokens: int = 512
+    llm_metadata_max_tokens: int = 1024
     max_audio_bytes: int = 26_214_400
 
     @property

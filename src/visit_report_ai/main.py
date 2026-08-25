@@ -26,7 +26,7 @@ app.add_middleware(
 
 def raise_service_error(error: Exception) -> None:
     if isinstance(error, ValueError):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from error
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
     if isinstance(error, RuntimeError):
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(error)) from error
     logging.exception("AI service request failed")
