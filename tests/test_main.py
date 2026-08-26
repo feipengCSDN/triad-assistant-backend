@@ -73,6 +73,7 @@ def test_form_extractions_uses_client_form_definition(monkeypatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["fields"]["location"]["value"] == "客户总部会议室"
+    assert "next_step" not in response.json()["fields"]
 
 
 def test_form_extractions_rejects_duplicate_field_keys() -> None:

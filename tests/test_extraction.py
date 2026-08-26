@@ -58,6 +58,45 @@ def test_null_metadata_confidence_defaults_to_zero() -> None:
     assert fields["location"].confidence == 0
 
 
+def test_empty_fields_are_removed_after_validation() -> None:
+    service = ExtractionService(Settings())
+    request = ExtractRequest(
+        transcript="客户在会议室沟通。",
+        form=FormDefinition(
+            fields=[
+                FormFieldDefinition(key="location", label="互动地点", required=True),
+                FormFieldDefinition(key="description", label="说明"),
+            ]
+        ),
+    )
+    fields = service._parse_fields(
+        request.form.fields,
+        {"fields": {"location": "客户会议室", "description": None}},
+    )
+    missing, _ = service._validate(request, fields)
+    response_fields = {
+        key: value
+        for key, value in fields.items()
+        if (value.value if isinstance(value, FieldSuggestion) else value) is not None
+    }
+
+    assert response_fields == {"location": "客户会议室"}
+    assert missing == []
+
+
+def test_empty_required_fields_are_removed_but_reported() -> None:
+    service = ExtractionService(Settings())
+    request = ExtractRequest(
+        transcript="客户进行了沟通。",
+        form=FormDefinition(fields=[FormFieldDefinition(key="location", label="互动地点", required=True)]),
+    )
+    fields = service._parse_fields(request.form.fields, {"fields": {"location": None}})
+    missing, _ = service._validate(request, fields)
+
+    assert fields["location"] is None
+    assert [item.field for item in missing] == ["location"]
+
+
 def test_dynamic_form_ignores_undeclared_fields_and_reports_low_confidence() -> None:
     service = ExtractionService(Settings())
     request = ExtractRequest(

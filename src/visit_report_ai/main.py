@@ -47,7 +47,11 @@ async def healthz() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post(f"{settings.api_prefix}/form-extractions", response_model=ExtractResponse)
+@app.post(
+    f"{settings.api_prefix}/form-extractions",
+    response_model=ExtractResponse,
+    response_model_exclude_none=True,
+)
 async def extract_from_transcript(request: ExtractRequest) -> ExtractResponse:
     try:
         return await ExtractionService(settings).extract(request)

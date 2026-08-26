@@ -32,16 +32,21 @@ class ExtractionService:
         payload = await self._request_completion(request)
         fields = self._parse_fields(request.form.fields, payload, request.include_metadata)
         missing, warnings = self._validate(request, fields)
+        response_fields = {
+            key: value
+            for key, value in fields.items()
+            if (value.value if isinstance(value, FieldSuggestion) else value) is not None
+        }
         logger.info(
             "form extraction completed elapsed_ms=%.0f fields=%d missing=%d warnings=%d",
             (time.perf_counter() - started_at) * 1000,
-            len(fields),
+            len(response_fields),
             len(missing),
             len(warnings),
         )
         return ExtractResponse(
             transcript=request.transcript,
-            fields=fields,
+            fields=response_fields,
             missing_required_fields=missing,
             warnings=warnings,
         )
