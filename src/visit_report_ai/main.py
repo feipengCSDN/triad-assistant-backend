@@ -11,6 +11,7 @@ from visit_report_ai.schemas.forms import (
 )
 from visit_report_ai.services.asr import AsrService
 from visit_report_ai.services.extraction import ExtractionService
+from visit_report_ai.services.voice_asr import VoiceAsrService
 
 settings = get_settings()
 logging.basicConfig(level=settings.log_level)
@@ -75,7 +76,7 @@ async def transcribe(audio: UploadFile = File(...)) -> TranscribeResponse:
 async def extract_from_voice(audio: UploadFile = File(...)) -> TranscribeResponse:
     try:
         content = await read_audio(audio)
-        text = await AsrService(settings).transcribe(content, audio.filename or "audio", audio.content_type)
+        text = await VoiceAsrService(settings).transcribe(content, audio.filename or "audio.wav", audio.content_type)
         return TranscribeResponse(transcript=text)
     except HTTPException:
         raise

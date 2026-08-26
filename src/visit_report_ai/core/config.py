@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     asr_base_url: str = ""
     asr_api_key: str = ""
     asr_model: str = "whisper-1"
+    voice_asr_base_url: str = "http://10.90.15.23:8770"
     llm_base_url: str = ""
     llm_api_key: str = ""
     llm_model: str = ""

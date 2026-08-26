@@ -4,6 +4,7 @@ from visit_report_ai.main import app
 from visit_report_ai.schemas.forms import ExtractResponse, FieldSuggestion
 from visit_report_ai.services.asr import AsrService
 from visit_report_ai.services.extraction import ExtractionService
+from visit_report_ai.services.voice_asr import VoiceAsrService
 
 
 def test_voice_form_extractions_only_transcribes(monkeypatch) -> None:
@@ -13,7 +14,7 @@ def test_voice_form_extractions_only_transcribes(monkeypatch) -> None:
     async def extract(self, request):
         raise AssertionError("voice-form-extractions must not extract form fields")
 
-    monkeypatch.setattr(AsrService, "transcribe", transcribe)
+    monkeypatch.setattr(VoiceAsrService, "transcribe", transcribe)
     monkeypatch.setattr(ExtractionService, "extract", extract)
 
     response = TestClient(app).post(
@@ -30,7 +31,7 @@ def test_voice_form_extractions_does_not_require_form_parameters(monkeypatch) ->
     async def transcribe(self, content: bytes, filename: str, content_type: str) -> str:
         return "转写结果"
 
-    monkeypatch.setattr(AsrService, "transcribe", transcribe)
+    monkeypatch.setattr(VoiceAsrService, "transcribe", transcribe)
 
     response = TestClient(app).post(
         "/api/v1/voice-form-extractions",

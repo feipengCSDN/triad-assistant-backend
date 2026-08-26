@@ -69,11 +69,13 @@ docker compose up --build -d
 
 `POST /api/v1/transcriptions`，以 `multipart/form-data` 上传 `audio` 文件。
 
-### 兼容语音转写路径
+### APP 语音转写路径
 
-`POST /api/v1/voice-form-extractions` 与 `/api/v1/transcriptions` 相同，以 `multipart/form-data` 上传 `audio`，仅返回转写文本。该路径保留用于兼容已有客户端。
+`POST /api/v1/voice-form-extractions` 供 APP 调用，以 `multipart/form-data` 上传 `audio`，后端将请求转发到配置的语音服务 `http://10.90.15.23:8770/v1/asr/transcribe`，并将上游返回的 `text` 转换为 `transcript`。前端无需直接访问上游地址。
+
+上游接口要求 WAV 文件，前端请求字段为 `audio`，后端转发字段为 `file`，并自动传递 `language=zh`。
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/voice-form-extractions \
-  -F "audio=@visit.m4a;type=audio/mp4"
+  -F "audio=@visit.wav;type=audio/wav"
 ```
