@@ -15,8 +15,6 @@ class VoiceAsrService:
     async def transcribe(self, content: bytes, filename: str, content_type: str) -> str:
         if not self.settings.voice_asr_base_url:
             raise RuntimeError("Voice ASR service is not configured")
-        if content[:4] != b"RIFF" or content[8:12] != b"WAVE":
-            raise ValueError("Voice ASR only supports WAV audio")
         files = {"file": (filename or "audio.wav", content, content_type)}
         upstream_url = f"{self.settings.voice_asr_base_url.rstrip('/')}/v1/asr/transcribe"
         logger.info(
